@@ -1,0 +1,7 @@
+node_modules/
+tmp/
+temp/
+dest/
+_td_database/
+.env
+*.code-workspace

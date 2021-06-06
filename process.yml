@@ -1,0 +1,7 @@
+apps:
+  - script : 'node'
+    args   : 'index.js'
+    name   : 'encoder'
+  - script : 'node'
+    args   : 'api.js'
+    name   : 'api'
