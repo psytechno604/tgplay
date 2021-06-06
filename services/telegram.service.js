@@ -195,21 +195,6 @@ module.exports = {
       }
     })
 
-    if (process.env.TDD_CHANNEL_ID && process.env.TDD_TEMP && process.env.TDD_HOME) { // = on localhost, when developing & debugging
-      bash.call(this, {
-        program: 'python3',
-        params: [
-          'telegram-download-daemon.py',
-          '--api-id', process.env.API_ID,
-          '--api-hash', process.env.API_HASH,
-          '--channel', process.env.TDD_CHANNEL_ID,
-          '--temp', process.env.TDD_TEMP,
-          '--dest', process.env.TDD_DEST,
-        ],
-        cwd: process.env.TDD_HOME
-      })
-    }
-
     const watcher = chokidar.watch(process.env.TDD_DEST, { ignored: /^\./, persistent: true })
     watcher.on('add', path => {
       const dlId = path.replace(/^.*[\\\/]/, '')
