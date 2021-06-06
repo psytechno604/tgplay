@@ -1,8 +1,8 @@
 const path = require('path')
 const axios = require('axios')
 const QueueService = require('moleculer-bull')
-const bash = require('./bash')
-const jobOpts = require('./lib/jobOpts')
+const bash = require('../lib/bash')
+const jobOpts = require('../lib/jobOpts')
 
 module.exports = {
   mixins: [QueueService(process.env.TRANSPORTER)],

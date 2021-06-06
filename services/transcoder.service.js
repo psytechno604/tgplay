@@ -1,7 +1,7 @@
 const path = require('path')
 const QueueService = require('moleculer-bull')
-const bash = require('./bash')
-const { ThroughDirectoryWrapper } = require('./lib/utils')
+const bash = require('../lib/bash')
+const { ThroughDirectoryWrapper } = require('../lib/utils')
 
 const losslessAudioFormats = process.env.LOSSLESS_AUDIO_FORMATS.split(',')
 

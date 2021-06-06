@@ -1,6 +1,6 @@
 require('dotenv-defaults').config()
 const { ServiceBroker } = require('moleculer')
-const apiService = require('./api.service')
+const apiService = require('./services/api.service')
 
 let broker = new ServiceBroker({
   logger: console,

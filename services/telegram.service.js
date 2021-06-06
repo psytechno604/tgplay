@@ -5,10 +5,10 @@ const uuid = require('uuid')
 const chokidar = require('chokidar')
 const { Client } = require('tdl')
 const { TDLib } = require('tdl-tdlib-addon')
-const bash = require('./bash')
+const bash = require('../lib/bash')
 const QueueService = require('moleculer-bull')
-const { ThroughDirectoryWrapper } = require('./lib/utils')
-const jobOpts = require('./lib/jobOpts')
+const { ThroughDirectoryWrapper } = require('../lib/utils')
+const jobOpts = require('../lib/jobOpts')
 
 const pictureFormats = process.env.PICTURE_FORMATS.split(',')
 
@@ -195,7 +195,7 @@ module.exports = {
       }
     })
 
-    if (process.env.TDD_CHANNEL_ID && process.env.TDD_TEMP && process.env.TDD_HOME) {
+    if (process.env.TDD_CHANNEL_ID && process.env.TDD_TEMP && process.env.TDD_HOME) { // = on localhost, when developing & debugging
       bash.call(this, {
         program: 'python3',
         params: [

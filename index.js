@@ -1,10 +1,10 @@
 require('dotenv-defaults').config()
 const { ServiceBroker } = require('moleculer')
-const googleService = require('./google.service')
-const yandexService = require('./yandex.service')
-const unpackerService = require('./unpacker.service')
-const transcoderService = require('./transcoder.service')
-const telegramService = require('./telegram.service')
+const googleService = require('./services/google.service')
+const yandexService = require('./services/yandex.service')
+const unpackerService = require('./services/unpacker.service')
+const transcoderService = require('./services/transcoder.service')
+const telegramService = require('./services/telegram.service')
 
 let broker = new ServiceBroker({
   logger: console,
