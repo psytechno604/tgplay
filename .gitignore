@@ -3,5 +3,7 @@ tmp/
 temp/
 dest/
 _td_database/
+tdd/
 .env
+.env.tdd
 *.code-workspace
