@@ -16,7 +16,8 @@ module.exports = {
       async process(job) {
         const fullUrl = process.env.YANDEX_PUBLIC_DL_URL + encodeURIComponent(job.data.releaseUrl)
         const res = await axios.get(fullUrl)
-        if (res && res.data && res.data._embedded && res.data._embedded.items) {
+        if (res && res.data && res.data._embedded && res.data._embedded.items
+          && !this.metadata.yandexUrls.has(res.data.name)) {
           this.metadata.yandexUrls.set(res.data.name, {
             length: res.data._embedded.items.length,
             messageId: job.data.messageId,
@@ -39,9 +40,7 @@ module.exports = {
     'yandex-file-queue': {
       concurrecncy: 1,
       async process(job) {
-        // await bash.call(this, { program: 'curl', params: ['-L', job.data.fileUrl, '--output', job.data.filePath] })
         await bash.call(this, { program: 'wget', params: ['-O', job.data.filePath, job.data.fileUrl] })
-        // await bash.call(this, { program: 'lftp', params: ['-c', `set net:idle 10; set net:max-retries 3; set net:reconnect-interval-base 3; set net:reconnect-interval-max 3; pget -n 10 -c "${job.data.filePath}"`]} )
         this.createJob('transcoder-queue', { dlId: job.data.dlId, filePath: job.data.filePath }, jobOpts)
       }
     }

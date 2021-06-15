@@ -4,6 +4,11 @@ temp/
 dest/
 _td_database/
 tdd/
+ffmpeg-4.4-amd64-static/
+ffmpeg-release-amd64-static.tar.xz
 .env
 .env.tdd
+.env.compose
+.config
 *.code-workspace
+*.log

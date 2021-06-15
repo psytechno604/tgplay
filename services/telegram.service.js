@@ -23,7 +23,7 @@ function detectURLs(message) {
 let client
 
 let dlCount = {
-  [process.env.DL_CHANNEL_ID]: 0,
+  [process.env.TELEGRAM_DAEMON_CHANNEL]: 0,
   [process.env.SOURCE_CHANNEL_ID]: 0
 }
 
@@ -33,7 +33,7 @@ module.exports = {
   metadata: {
     dlCache: new Map(),
     msgIdCache: {
-      [process.env.DL_CHANNEL_ID]: new Map(),
+      [process.env.TELEGRAM_DAEMON_CHANNEL]: new Map(),
       [process.env.SOURCE_CHANNEL_ID]: new Map(),
     }
   },
@@ -44,7 +44,8 @@ module.exports = {
         try {
           let messageId = job.data.messageId
           if (!messageId) {
-            messageId = this.metadata.dlCache.get(job.data.dlId).messageId
+            const cachedItem = this.metadata.dlCache.get(job.data.dlId)            
+            cachedItem && (messageId = this.metadata.dlCache.get(job.data.dlId).messageId)
           }
 
           const files = ThroughDirectoryWrapper(path.join(process.env.TMP_DIR, 'unpack', job.data.dlId))
@@ -57,11 +58,9 @@ module.exports = {
           messageId && await client.invoke({
             _: 'forwardMessages',
             chat_id: process.env.TRACKS_CHANNEL_ID,
-            from_chat_id: process.env.DL_CHANNEL_ID,
+            from_chat_id: process.env.TELEGRAM_DAEMON_CHANNEL,
             message_ids: [messageId]
           })
-
-
 
           if (!hasPhoto) {
             const pictureFiles = files.filter(file => pictureFormats.indexOf(file.split('.').pop()) >= 0)
@@ -99,8 +98,9 @@ module.exports = {
           } catch (ex) {
             this.logger.error('Error while deleting folders', ex)
           }
+          return 'done'
         } catch (ex) {
-          this.logger.error(ex)
+          this.logger.error('telegram-upload-queue: error', ex)
           throw ex
         }
       }
@@ -128,14 +128,14 @@ module.exports = {
             })
             await client.invoke({
               _: 'forwardMessages',
-              chat_id: process.env.DL_CHANNEL_ID,
+              chat_id: process.env.TELEGRAM_DAEMON_CHANNEL,
               from_chat_id: process.env.SOURCE_CHANNEL_ID,
               message_ids: [payload.last_message.id]
             })
           }
         }
       }
-      if (payload.chat_id === +process.env.DL_CHANNEL_ID || payload.chat_id === +process.env.SOURCE_CHANNEL_ID) {
+      if (payload.chat_id === +process.env.TELEGRAM_DAEMON_CHANNEL || payload.chat_id === +process.env.SOURCE_CHANNEL_ID) {
         // patch to skip first 3 messages on start (in each chat)
         if (++dlCount[payload.chat_id] <= 3) {
           return
@@ -195,7 +195,7 @@ module.exports = {
       }
     })
 
-    const watcher = chokidar.watch(process.env.TDD_DEST, { ignored: /^\./, persistent: true })
+    const watcher = chokidar.watch(process.env.TELEGRAM_DAEMON_DEST, { ignored: /^\./, persistent: true })
     watcher.on('add', path => {
       const dlId = path.replace(/^.*[\\\/]/, '')
       this.logger.debug(`will create job for unpacker-queue, dlId=${dlId}, path=${path}`)
@@ -203,8 +203,8 @@ module.exports = {
     })
 
     setTimeout(() => {
-      if (dlCount[process.env.DL_CHANNEL_ID] <= 3) {
-        dlCount[process.env.DL_CHANNEL_ID] = 3
+      if (dlCount[process.env.TELEGRAM_DAEMON_CHANNEL] <= 3) {
+        dlCount[process.env.TELEGRAM_DAEMON_CHANNEL] = 3
       }
       if (dlCount[process.env.SOURCE_CHANNEL_ID] <= 3) {
         dlCount[process.env.SOURCE_CHANNEL_ID] = 3

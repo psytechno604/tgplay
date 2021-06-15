@@ -1,17 +1,31 @@
 version: '3.5'
 
 services:
-  telegram-download-daemon:
-    build: .
-    image: telegram-download-daemon:latest
+  tdd:
+    build: ./tdd
+    image: ${DOCKERHUB_USER}/tdd:${TDD_TAG}
     environment:
       TELEGRAM_DAEMON_API_ID: "${API_ID}"
       TELEGRAM_DAEMON_API_HASH: "${API_HASH}"
-      TELEGRAM_DAEMON_CHANNEL: "${DL_CHANNEL_ID}"
-      TELEGRAM_DAEMON_DEST: "/downloads"
-      TELEGRAM_DAEMON_SESSION_PATH: "/session"
+      TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"
+      TELEGRAM_DAEMON_DEST: "${TELEGRAM_DAEMON_DEST}"
+      TELEGRAM_DAEMON_SESSION_PATH: "${TELEGRAM_DAEMON_SESSION_PATH}"
     volumes:
-       - ${TDD_DEST}:/downloads
-       - ${TDD_HOME}:/session
+       - ./tdd:${TELEGRAM_DAEMON_SESSION_PATH}
+       - ./dest:${TELEGRAM_DAEMON_DEST}
+       - ./temp:/temp
     restart: unless-stopped
-  
+  redis:
+    image: redis
+    container_name: cache
+    expose:
+      - 6379
+    restart: unless-stopped
+  tgplay:
+    build: ./
+    image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
+    environment:
+      API_HASH: "${API_HASH}",
+    volumes:
+      - ./tdd:/session
+    restart: unless-stopped
