@@ -20,6 +20,12 @@ WORKDIR /app
 RUN npm ci
 RUN chmod +x start.sh
 
+RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
+RUN echo "739057dc7799211b7024319d80c247ec931d6a4a  ffmpeg-release-amd64-static.tar.xz" > check.txt
+RUN sha1sum -c check.txt
+RUN tar xf ffmpeg-release-amd64-static.tar.xz
+RUN rm ffmpeg-release-amd64-static.tar.xz
+
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["/app/start.sh"]
