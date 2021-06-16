@@ -24,7 +24,7 @@ let client
 
 let dlCount = {
   [process.env.TELEGRAM_DAEMON_CHANNEL]: 0,
-  [process.env.SOURCE_CHANNEL_ID]: 0
+  [process.env.SOURCE_CHANNEL]: 0
 }
 
 module.exports = {
@@ -34,7 +34,7 @@ module.exports = {
     dlCache: new Map(),
     msgIdCache: {
       [process.env.TELEGRAM_DAEMON_CHANNEL]: new Map(),
-      [process.env.SOURCE_CHANNEL_ID]: new Map(),
+      [process.env.SOURCE_CHANNEL]: new Map(),
     }
   },
   queues: {
@@ -57,7 +57,7 @@ module.exports = {
 
           messageId && await client.invoke({
             _: 'forwardMessages',
-            chat_id: process.env.TRACKS_CHANNEL_ID,
+            chat_id: process.env.TRACKS_CHANNEL,
             from_chat_id: process.env.TELEGRAM_DAEMON_CHANNEL,
             message_ids: [messageId]
           })
@@ -114,7 +114,7 @@ module.exports = {
     await client.connectAndLogin()
     client.on('error', this.logger.error)
     client.on('update', async payload => {
-      if (payload.chat_id === +process.env.SOURCE_CHANNEL_ID) {
+      if (payload.chat_id === +process.env.SOURCE_CHANNEL) {
         // patch to skip first 3 messages on start (in each chat)
         if (++dlCount[payload.chat_id] <= 3) {
           return
@@ -129,13 +129,13 @@ module.exports = {
             await client.invoke({
               _: 'forwardMessages',
               chat_id: process.env.TELEGRAM_DAEMON_CHANNEL,
-              from_chat_id: process.env.SOURCE_CHANNEL_ID,
+              from_chat_id: process.env.SOURCE_CHANNEL,
               message_ids: [payload.last_message.id]
             })
           }
         }
       }
-      if (payload.chat_id === +process.env.TELEGRAM_DAEMON_CHANNEL || payload.chat_id === +process.env.SOURCE_CHANNEL_ID) {
+      if (payload.chat_id === +process.env.TELEGRAM_DAEMON_CHANNEL || payload.chat_id === +process.env.SOURCE_CHANNEL) {
         // patch to skip first 3 messages on start (in each chat)
         if (++dlCount[payload.chat_id] <= 3) {
           return
@@ -179,12 +179,12 @@ module.exports = {
           }
         }
       }
-      if (payload.chat_id === +process.env.TRACKS_CHANNEL_ID) {
+      if (payload.chat_id === +process.env.TRACKS_CHANNEL) {
         if (payload.last_message) {
           try {
             await client.invoke({
               _: 'editMessageCaption',
-              chat_id: process.env.TRACKS_CHANNEL_ID,
+              chat_id: process.env.TRACKS_CHANNEL,
               message_id: payload.last_message.id,
               caption: { text: '' }
             })
@@ -206,8 +206,8 @@ module.exports = {
       if (dlCount[process.env.TELEGRAM_DAEMON_CHANNEL] <= 3) {
         dlCount[process.env.TELEGRAM_DAEMON_CHANNEL] = 3
       }
-      if (dlCount[process.env.SOURCE_CHANNEL_ID] <= 3) {
-        dlCount[process.env.SOURCE_CHANNEL_ID] = 3
+      if (dlCount[process.env.SOURCE_CHANNEL] <= 3) {
+        dlCount[process.env.SOURCE_CHANNEL] = 3
       }
       this.logger.info('ready to receive messages')
     }, 3000)
