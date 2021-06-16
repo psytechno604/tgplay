@@ -26,6 +26,14 @@ RUN sha1sum -c check.txt
 RUN tar xf ffmpeg-release-amd64-static.tar.xz
 RUN rm ffmpeg-release-amd64-static.tar.xz
 
+ENV TMP_DIR "/app/tmp"
+ENV TELEGRAM_UPLOAD "telegram-upload"
+ENV FFMPEG "/app/ffmpeg-4.4-amd64-static/ffmpeg"
+ENV TELEGRAM_DAEMON_DEST "/downloads"
+
+RUN mkdir /downloads
+RUN mkdir /home/whatever/.config
+
 COPY entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["/app/start.sh"]

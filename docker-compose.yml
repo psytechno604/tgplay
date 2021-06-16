@@ -2,18 +2,18 @@ version: '3.5'
 
 services:
   tdd:
-    build: ./tdd
-    image: ${DOCKERHUB_USER}/tdd:${TDD_TAG}
+    image: telegram-download-daemon:latest
     environment:
       TELEGRAM_DAEMON_API_ID: "${API_ID}"
       TELEGRAM_DAEMON_API_HASH: "${API_HASH}"
       TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"
-      TELEGRAM_DAEMON_DEST: "${TELEGRAM_DAEMON_DEST}"
-      TELEGRAM_DAEMON_SESSION_PATH: "${TELEGRAM_DAEMON_SESSION_PATH}"
+      TELEGRAM_DAEMON_DEST: "/downloads"
+      TELEGRAM_DAEMON_TEMP: "/tmp"
+      TELEGRAM_DAEMON_SESSION_PATH: "/session"
     volumes:
-       - ./tdd:${TELEGRAM_DAEMON_SESSION_PATH}
-       - ./dest:${TELEGRAM_DAEMON_DEST}
-       - ./temp:/temp
+       - ${HOST_TELEGRAM_DAEMON_SESSION_PATH}:/session
+       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
+       - ${HOST_TELEGRAM_DAEMON_TEMP}:/tmp
     restart: unless-stopped
   redis:
     image: redis
@@ -22,10 +22,17 @@ services:
       - 6379
     restart: unless-stopped
   tgplay:
-    build: ./
     image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
     environment:
-      API_HASH: "${API_HASH}",
+      API_ID: "${API_ID}"
+      API_HASH: "${API_HASH}"
+      SOURCE_CHANNEL: "${SOURCE_CHANNEL}"
+      TRACKS_CHANNEL: "${TRACKS_CHANNEL}"
+      TRACKS_CHANNEL_URL: "${TRACKS_CHANNEL_URL}"
+      TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"      
+      TRANSPORTER: "redis://redis:6379"
     volumes:
-      - ./tdd:/session
+      - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
+      - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
+      - ${HOST_TGPLAY_TEMP}:/app/tmp
     restart: unless-stopped
