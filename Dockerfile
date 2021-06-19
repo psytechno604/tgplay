@@ -42,6 +42,7 @@ ENV TMP_DIR "/app/tmp"
 ENV TELEGRAM_UPLOAD "telegram-upload"
 ENV FFMPEG "/app/ffmpeg-4.4-amd64-static/ffmpeg"
 ENV TELEGRAM_DAEMON_DEST "/downloads"
+ENV LIBTDJSON_SO "/td/build/libtdjson.so"
 
 # directories:
 RUN mkdir /downloads

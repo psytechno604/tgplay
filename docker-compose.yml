@@ -23,13 +23,14 @@ services:
     restart: unless-stopped
   tgplay:
     image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
+#    image: tgplay:latest
     environment:
       API_ID: "${API_ID}"
       API_HASH: "${API_HASH}"
       SOURCE_CHANNEL: "${SOURCE_CHANNEL}"
       TRACKS_CHANNEL: "${TRACKS_CHANNEL}"
       TRACKS_CHANNEL_URL: "${TRACKS_CHANNEL_URL}"
-      TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"      
+      TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"  
       TRANSPORTER: "redis://redis:6379"
     volumes:
       - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
