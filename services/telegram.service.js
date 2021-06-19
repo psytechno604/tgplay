@@ -52,7 +52,11 @@ module.exports = {
 
           let hasPhoto = job.data.hasPhoto
           if (typeof hasPhoto === 'undefined') {
-            hasPhoto = this.metadata.dlCache.get(job.data.dlId).hasPhoto
+            const cacheEntry = this.metadata.dlCache.get(job.data.dlId)
+            if (!cacheEntry) {
+              this.logger.error('No cache entry fol dlId', job.data.dlId)
+            }
+            cacheEntry && (hasPhoto = this.metadata.dlCache.get(job.data.dlId).hasPhoto)
           }
 
           if (!messageId) {
@@ -111,6 +115,7 @@ module.exports = {
     }
   },
   async started() {
+    this.logger.debug('LIBTDJSON_SO', process.env.LIBTDJSON_SO)
     client = new Client(new TDLib(process.env.LIBTDJSON_SO), {
       apiId: process.env.API_ID, // Your api_id, get it at http://my.telegram.org/
       apiHash: process.env.API_HASH // Your api_hash
