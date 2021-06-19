@@ -55,6 +55,10 @@ module.exports = {
             hasPhoto = this.metadata.dlCache.get(job.data.dlId).hasPhoto
           }
 
+          if (!messageId) {
+            this.logger.error('no messageId', job.data)
+          }
+
           messageId && await client.invoke({
             _: 'forwardMessages',
             chat_id: process.env.TRACKS_CHANNEL,
@@ -107,13 +111,14 @@ module.exports = {
     }
   },
   async started() {
-    client = new Client(new TDLib('/home/sergey/Code/td/build/libtdjson.so'), {
+    client = new Client(new TDLib(process.env.LIBTDJSON_SO), {
       apiId: process.env.API_ID, // Your api_id, get it at http://my.telegram.org/
       apiHash: process.env.API_HASH // Your api_hash
     })
     await client.connectAndLogin()
     client.on('error', this.logger.error)
     client.on('update', async payload => {
+      const hasPhoto = payload && payload.last_message && payload.last_message.content && payload.last_message.content.web_page && !!payload.last_message.content.web_page.photo
       if (payload.chat_id === +process.env.SOURCE_CHANNEL) {
         // patch to skip first 3 messages on start (in each chat)
         if (++dlCount[payload.chat_id] <= 3) {
@@ -124,7 +129,7 @@ module.exports = {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
               messageId: payload.last_message.id,
               text: payload.last_message.content.text,
-              hasPhoto: !!(payload.last_message.content.web_page && payload.last_message.content.web_page.photo)
+              hasPhoto
             })
             await client.invoke({
               _: 'forwardMessages',
@@ -146,22 +151,22 @@ module.exports = {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
               messageId: payload.last_message.id,
               text: payload.last_message.content.text,
-              hasPhoto: !!(payload.last_message.content.web_page && payload.last_message.content.web_page.photo)
+              hasPhoto
             })
             this.metadata.dlCache.set(payload.last_message.content.document.file_name, {
               messageId: payload.last_message.id,
               text: payload.last_message.content.text,
-              hasPhoto: !!(payload.last_message.content.web_page && payload.last_message.content.web_page.photo)
+              hasPhoto
             })
           }
         }
         // parse for disk.yandex link and download from there:
-        if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.text && payload.last_message.content.text.text) {
+        if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.text && payload.last_message.content.text.text) {          
           if (!this.metadata.msgIdCache[payload.chat_id].has(payload.last_message.id)) {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
               messageId: payload.last_message.id,
               text: payload.last_message.content.text,
-              hasPhoto: !!(payload.last_message.content.web_page && payload.last_message.content.web_page.photo)
+              hasPhoto
             })
             const urls = detectURLs(payload.last_message.content.text.text)
             if (Array.isArray(urls)) {
@@ -172,7 +177,7 @@ module.exports = {
                   releaseUrl,
                   messageId: payload.last_message.id,
                   text: payload.last_message.content.text,
-                  hasPhoto: !!payload.last_message.content.web_page.photo
+                  hasPhoto
                 }, jobOpts)
               })
             }

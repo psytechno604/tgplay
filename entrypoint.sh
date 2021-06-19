@@ -1,5 +1,5 @@
 #!/bin/sh
 
-chown -R whatever /app/tmp
-chown -R whatever /home/whatever/.config
+chown -R whatever /app
+chown -R whatever /home/whatever
 exec runuser -u whatever "$@"
