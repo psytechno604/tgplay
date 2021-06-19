@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   tdd:
-    image: telegram-download-daemon:latest
+    image: alfem/telegram-download-daemon:latest
     environment:
       TELEGRAM_DAEMON_API_ID: "${API_ID}"
       TELEGRAM_DAEMON_API_HASH: "${API_HASH}"
@@ -35,4 +35,6 @@ services:
       - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
       - ${HOST_TGPLAY_TEMP}:/app/tmp
+      - ${HOST_TD_FILES}:/app/_td_files
+      - ${HOST_TD_DATABASE}:/app/_td_database
     restart: unless-stopped

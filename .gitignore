@@ -3,6 +3,7 @@ tmp/
 temp/
 dest/
 _td_database/
+_td_files/
 tdd/
 ffmpeg-4.4-amd64-static/
 ffmpeg-release-amd64-static.tar.xz

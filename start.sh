@@ -1,4 +1,4 @@
 #!/bin/sh
 
-node api.js &
-node index.js
+node /app/api.js &
+node /app/index.js

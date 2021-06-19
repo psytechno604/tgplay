@@ -1,1 +1,1 @@
-docker run --env-file .env -v /home/sergey/Code/tgplay/tdd:/session -v /home/sergey/Code/tgplay/dest:/dest -v /home/sergey/Code/tgplay/temp:/temp --memory 256m p79629759529/tgplay:master-a160207 
+docker run --env-file .env.compose -v /home/sergey/Code/tgplay/tdd:/session -v /home/sergey/Code/tgplay/dest:/downloads -v /home/sergey/Code/tgplay/temp:/app/tmp -v /home/sergey/Code/_td/_database:/app/_td_database -v /home/sergey/Code/_td/_files:/app/_td_files --memory 256m tgplay:latest
