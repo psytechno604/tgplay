@@ -18,17 +18,8 @@ ENV LANG=C.UTF-8
 RUN useradd -ms /bin/bash whatever
 
 # app:
-RUN mkdir /app
-RUN mkdir /app/tmp
-COPY *.json /app/
-COPY *.js /app/
-COPY start.sh /app/
-COPY .env.defaults /app/
-COPY services/ /app/services/
-COPY lib/ /app/lib/
+RUN mkdir /app && mkdir /app/tmp
 WORKDIR /app
-RUN npm ci
-RUN chmod +x start.sh
 
 # ffmpeg:
 RUN wget https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-amd64-static.tar.xz
@@ -43,12 +34,21 @@ ENV TELEGRAM_UPLOAD "telegram-upload"
 ENV FFMPEG "/app/ffmpeg-4.4-amd64-static/ffmpeg"
 ENV TELEGRAM_DAEMON_DEST "/downloads"
 ENV LIBTDJSON_SO "/td/build/libtdjson.so"
-  
+
 # directories:
 RUN mkdir /downloads
 RUN mkdir /home/whatever/.config
 
+# app:
+COPY *.json /app/
+COPY *.js /app/
+COPY start.sh /app/
+COPY .env.defaults /app/
+COPY services/ /app/services/
+COPY lib/ /app/lib/
 WORKDIR /app
+RUN npm ci
+RUN chmod +x start.sh
 
 # entrypoint:
 COPY entrypoint.sh /entrypoint.sh
