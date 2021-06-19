@@ -22,8 +22,8 @@ services:
       - 6379
     restart: unless-stopped
   tgplay:
-    image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
-#    image: tgplay:latest
+#    image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
+    image: tgplay:latest
     environment:
       API_ID: "${API_ID}"
       API_HASH: "${API_HASH}"
