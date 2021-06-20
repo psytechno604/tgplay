@@ -2,7 +2,7 @@ version: '3.5'
 
 services:
   tdd:
-    image: alfem/telegram-download-daemon:latest
+    image: ${DOCKERHUB_USER}/tdd:${TDD_TAG}
     environment:
       TELEGRAM_DAEMON_API_ID: "${API_ID}"
       TELEGRAM_DAEMON_API_HASH: "${API_HASH}"
@@ -22,8 +22,8 @@ services:
       - 6379
     restart: unless-stopped
   tgplay:
-#    image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
-    image: tgplay:latest
+    image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
+#    image: tgplay:latest
     environment:
       API_ID: "${API_ID}"
       API_HASH: "${API_HASH}"
