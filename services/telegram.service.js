@@ -97,6 +97,7 @@ module.exports = {
           if (mp3Files.length) {
             const params = ['--to', process.env.TRACKS_CHANNEL_URL, '--album']
             mp3Files.forEach(f => params.push(f))
+            this.logger.debug('running TELEGRAM_UPLOAD', { params })
             await bash.call(this, { program: process.env.TELEGRAM_UPLOAD, params })
           }
 

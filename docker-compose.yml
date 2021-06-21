@@ -32,10 +32,15 @@ services:
       TRACKS_CHANNEL_URL: "${TRACKS_CHANNEL_URL}"
       TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"  
       TRANSPORTER: "redis://redis:6379"
+      DEBUG: "true    "
     volumes:
       - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
       - ${HOST_TGPLAY_TEMP}:/app/tmp
       - ${HOST_TD_FILES}:/app/_td_files
       - ${HOST_TD_DATABASE}:/app/_td_database
+    expose:
+      - 4200
+    ports:
+      - "4200:4200"
     restart: unless-stopped
