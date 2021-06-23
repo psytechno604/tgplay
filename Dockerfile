@@ -12,7 +12,8 @@ RUN cmake --build . --target install
 # telergam-upload:
 RUN apt-get update || : && apt-get install python -y
 RUN apt-get install python3-pip -y
-RUN pip3 install -U telegram-upload
+# RUN pip3 install -U telegram-upload
+RUN pip3 install https://github.com/Nekmo/telegram-upload/archive/master.zip
 ENV LC_ALL=C.UTF-8
 ENV LANG=C.UTF-8
 RUN useradd -ms /bin/bash whatever
