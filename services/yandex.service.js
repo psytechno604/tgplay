@@ -27,11 +27,12 @@ module.exports = {
           const dlFolder = path.join(process.env.TMP_DIR, 'unpack', res.data.name)
           await bash.call(this, { program: 'mkdir', params: ['-p', dlFolder] })
           for (const item of res.data._embedded.items) {
-            this.createJob('yandex-file-queue', {
+            const filePath = path.join(dlFolder, item.name)
+            await this.createJob('yandex-file-queue', {
               dlId: res.data.name,
               fileUrl: item.file,
-              filePath: path.join(dlFolder, item.name)
-            }, jobOpts)
+              filePath
+            }, jobOpts(filePath))
           }
           return res.data.name
         }
@@ -41,7 +42,7 @@ module.exports = {
       concurrecncy: 1,
       async process(job) {
         await bash.call(this, { program: 'wget', params: ['-O', job.data.filePath, job.data.fileUrl] })
-        this.createJob('transcoder-queue', { dlId: job.data.dlId, filePath: job.data.filePath }, jobOpts)
+        this.createJob('transcoder-queue', { dlId: job.data.dlId, filePath: job.data.filePath }, jobOpts(job.data.filePath))
       }
     }
   },
@@ -54,7 +55,7 @@ module.exports = {
           messageId: x.messageId,
           hasPhoto: x.hasPhoto,
           text: x.text
-        }, jobOpts)
+        }, jobOpts(payload.dlId))
         this.metadata.yandexUrls.delete(payload.dlId)
         return
       }

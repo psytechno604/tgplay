@@ -23,9 +23,11 @@ function detectURLs(message) {
 let client
 
 let dlCount = {
-  [process.env.TELEGRAM_DAEMON_CHANNEL]: 0,
-  [process.env.SOURCE_CHANNEL]: 0
+  [process.env.TELEGRAM_DAEMON_CHANNEL]: [],
+  [process.env.SOURCE_CHANNEL]: []
 }
+
+let dlLimit = 4
 
 module.exports = {
   mixins: [QueueService(process.env.TRANSPORTER)],
@@ -44,7 +46,7 @@ module.exports = {
         try {
           let messageId = job.data.messageId
           if (!messageId) {
-            const cachedItem = this.metadata.dlCache.get(job.data.dlId)            
+            const cachedItem = this.metadata.dlCache.get(job.data.dlId)
             cachedItem && (messageId = this.metadata.dlCache.get(job.data.dlId).messageId)
           }
 
@@ -67,6 +69,13 @@ module.exports = {
             _: 'forwardMessages',
             chat_id: process.env.TRACKS_CHANNEL,
             from_chat_id: process.env.TELEGRAM_DAEMON_CHANNEL,
+            message_ids: [messageId]
+          })
+
+          messageId && await client.invoke({ // TODO: !!! wtf !!!
+            _: 'forwardMessages',
+            chat_id: process.env.TRACKS_CHANNEL,
+            from_chat_id: process.env.SOURCE_CHANNEL,
             message_ids: [messageId]
           })
 
@@ -110,7 +119,8 @@ module.exports = {
           return 'done'
         } catch (ex) {
           this.logger.error('telegram-upload-queue: error', ex)
-          throw ex
+          return 'wtf..: ' + ex.message
+          //throw ex
         }
       }
     }
@@ -127,7 +137,8 @@ module.exports = {
       const hasPhoto = payload && payload.last_message && payload.last_message.content && payload.last_message.content.web_page && !!payload.last_message.content.web_page.photo
       if (payload.chat_id === +process.env.SOURCE_CHANNEL) {
         // patch to skip first 3 messages on start (in each chat)
-        if (++dlCount[payload.chat_id] <= 3) {
+        if (dlCount[payload.chat_id].length < dlLimit) {
+          dlCount[payload.chat_id].push(payload)
           return
         }
         if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.document) {
@@ -148,30 +159,33 @@ module.exports = {
       }
       if (payload.chat_id === +process.env.TELEGRAM_DAEMON_CHANNEL || payload.chat_id === +process.env.SOURCE_CHANNEL) {
         // patch to skip first 3 messages on start (in each chat)
-        if (++dlCount[payload.chat_id] <= 3) {
+        if (dlCount[payload.chat_id].length < dlLimit) {
+          dlCount[payload.chat_id].push(payload)
           return
         }
-        // download attachment from cloud:
+        // download attachment from telegram cloud:
         if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.document) {
           if (!this.metadata.msgIdCache[payload.chat_id].has(payload.last_message.id)) {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
               messageId: payload.last_message.id,
-              text: payload.last_message.content.text,
+              text: payload.last_message.content.text || payload.last_message.content.caption && payload.last_message.content.caption.text,
               hasPhoto
             })
-            this.metadata.dlCache.set(payload.last_message.content.document.file_name, {
-              messageId: payload.last_message.id,
-              text: payload.last_message.content.text,
-              hasPhoto
-            })
+            if (!this.metadata.dlCache.has(payload.last_message.content.document.file_name)) {
+              this.metadata.dlCache.set(payload.last_message.content.document.file_name, {
+                messageId: payload.last_message.id,
+                text: payload.last_message.content.text || payload.last_message.content.caption && payload.last_message.content.caption.text,
+                hasPhoto
+              })
+            }
           }
         }
         // parse for disk.yandex link and download from there:
-        if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.text && payload.last_message.content.text.text) {          
+        if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.text && payload.last_message.content.text.text) {
           if (!this.metadata.msgIdCache[payload.chat_id].has(payload.last_message.id)) {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
               messageId: payload.last_message.id,
-              text: payload.last_message.content.text,
+              text: payload.last_message.content.text || payload.last_message.content.caption && payload.last_message.content.caption.text,
               hasPhoto
             })
             const urls = detectURLs(payload.last_message.content.text.text)
@@ -184,7 +198,7 @@ module.exports = {
                   messageId: payload.last_message.id,
                   text: payload.last_message.content.text,
                   hasPhoto
-                }, jobOpts)
+                }, jobOpts(releaseUrl))
               })
             }
           }
@@ -210,16 +224,11 @@ module.exports = {
     watcher.on('add', path => {
       const dlId = path.replace(/^.*[\\\/]/, '')
       this.logger.debug(`will create job for unpacker-queue, dlId=${dlId}, path=${path}`)
-      this.createJob('unpacker-queue', { path, dlId }, jobOpts)
+      this.createJob('unpacker-queue', { path, dlId }, jobOpts(dlId))
     })
 
     setTimeout(() => {
-      if (dlCount[process.env.TELEGRAM_DAEMON_CHANNEL] <= 3) {
-        dlCount[process.env.TELEGRAM_DAEMON_CHANNEL] = 3
-      }
-      if (dlCount[process.env.SOURCE_CHANNEL] <= 3) {
-        dlCount[process.env.SOURCE_CHANNEL] = 3
-      }
+      dlLimit = 0
       this.logger.info('ready to receive messages')
     }, 3000)
   }
