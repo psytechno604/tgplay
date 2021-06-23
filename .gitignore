@@ -13,5 +13,6 @@ ffmpeg-release-amd64-static.tar.xz
 .config
 *.code-workspace
 *.log
+*.zip
 telegram-upload.json
 telegram-upload.session

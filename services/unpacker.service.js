@@ -12,7 +12,7 @@ module.exports = {
   events: {
     'file-complete'(payload) {
       if (payload.dlId && this.metadata.dlCache.has(payload.dlId)) {
-        this.createJob('telegram-upload-queue', { dlId: payload.dlId }, jobOpts)
+        this.createJob('telegram-upload-queue', { dlId: payload.dlId }, jobOpts(payload.dlId))
         this.metadata.dlCache.delete(payload.dlId)
       }
     }
@@ -22,6 +22,11 @@ module.exports = {
       concurrency: 2,
       async process(job) {
         this.logger.debug('unpacker.queue.process', job)
+        if (this.metadata.dlCache.has(job.data.dlId)) {
+          const msg = `already processing: ${job.data.dlId}`
+          this.logger.debug(msg)
+          return msg
+        }
         this.metadata.dlCache.set(job.data.dlId, 1)
         await bash.call(this, { program: 'mkdir', params: ['-p', path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)] })
         const ext = job.data.path.split('.').pop()
@@ -41,7 +46,7 @@ module.exports = {
         if (index < 0) {
           throw new Error(`extension ${ext} not supported, dlId ${job.data.dlId}, job.id ${job.id}`)
         }
-        this.createJob('transcoder-queue', { dlId: job.data.dlId }, jobOpts)
+        this.createJob('transcoder-queue', { dlId: job.data.dlId }, jobOpts(job.data.dlId))
       }
     }
   }

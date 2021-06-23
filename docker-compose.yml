@@ -32,7 +32,9 @@ services:
       TRACKS_CHANNEL_URL: "${TRACKS_CHANNEL_URL}"
       TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"  
       TRANSPORTER: "redis://redis:6379"
-      DEBUG: "true    "
+      DEBUG: "${DEBUG}"
+      TELEGRAM_DOWNLOAD_TIMEOUT: "${TELEGRAM_DOWNLOAD_TIMEOUT}"
+      LOG_LEVEL: "${LOG_LEVEL}"
     volumes:
       - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
