@@ -1,1 +1,1 @@
-docker run --env-file .env.compose -v /home/sergey/Code/tgplay/tdd:/session -v /home/sergey/Code/tgplay/dest:/downloads -v /home/sergey/Code/tgplay/temp:/app/tmp -v /home/sergey/Code/_td/_database:/app/_td_database -v /home/sergey/Code/_td/_files:/app/_td_files --memory 256m tgplay:latest
+docker run --env-file .env.vps -v /usr/tgplay/session/telegram-upload:/home/whatever/.config -v /usr/tgplay/session/tdlib/_database:/app/_td_database -ti p79629759529/tgplay:master-64d9951 bash
