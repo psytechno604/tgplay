@@ -1,4 +1,5 @@
 const path = require('path')
+const fs = require('fs')
 const QueueService = require('moleculer-bull')
 const bash = require('../lib/bash')
 const { ThroughDirectoryWrapper } = require('../lib/utils')
@@ -11,7 +12,11 @@ module.exports = {
   queues: {
     "transcoder-queue": {
       async process(job) {
-        await bash.call(this, { program: 'mkdir', params: ['-p', path.join(process.env.TMP_DIR, 'mp3', job.data.dlId)] })
+        const mp3Dir = path.join(process.env.TMP_DIR, 'mp3', job.data.dlId)
+        if (fs.existsSync(mp3Dir)) {
+          return `${mp3Dir} folder already exists`
+        }
+        await bash.call(this, { program: 'mkdir', params: ['-p', mp3Dir] })
         const files = job.data.filePath ? [job.data.filePath] : ThroughDirectoryWrapper(path.join(process.env.TMP_DIR, 'unpack', job.data.dlId))
         const outfiles = []
         for (const file of files) {
