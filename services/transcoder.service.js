@@ -13,9 +13,9 @@ module.exports = {
     "transcoder-queue": {
       async process(job) {
         const mp3Dir = path.join(process.env.TMP_DIR, 'mp3', job.data.dlId)
-        if (fs.existsSync(mp3Dir)) {
+        /* if (fs.existsSync(mp3Dir)) { // TODO: catch "respawns"
           return `${mp3Dir} folder already exists`
-        }
+        } */
         await bash.call(this, { program: 'mkdir', params: ['-p', mp3Dir] })
         const files = job.data.filePath ? [job.data.filePath] : ThroughDirectoryWrapper(path.join(process.env.TMP_DIR, 'unpack', job.data.dlId))
         const outfiles = []
@@ -32,5 +32,5 @@ module.exports = {
         return outfiles
       }
     }
-  }
+  }  
 }
