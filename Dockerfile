@@ -43,12 +43,12 @@ RUN mkdir /home/whatever/.config
 # app:
 COPY *.json /app/
 WORKDIR /app
+RUN npm ci
 COPY *.js /app/
 COPY start.sh /app/
 COPY .env.defaults /app/
 COPY services/ /app/services/
 COPY lib/ /app/lib/
-RUN npm ci
 RUN chmod +x start.sh
 
 # entrypoint:
