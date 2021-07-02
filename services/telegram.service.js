@@ -223,6 +223,15 @@ module.exports = {
     const watcher = chokidar.watch(process.env.TELEGRAM_DAEMON_DEST, { ignored: /^\./, persistent: true })
     watcher.on('add', path => {
       const dlId = path.replace(/^.*[\\\/]/, '')
+      const check = await this.broker.call('database.dlIdExists', { dlId })
+      if (check) {
+        this.logger.debug(`already processed: ${dlId}`)
+        return 'already processed'
+      }
+      await this.broker.call('database.insertDlId', {
+        dlId,
+        serviceName: 'telegram'
+      })
       this.logger.debug(`will create job for unpacker-queue, dlId=${dlId}, path=${path}`)
       this.createJob('unpacker-queue', { path, dlId }, jobOpts(dlId))
     })
