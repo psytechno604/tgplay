@@ -5,6 +5,7 @@ const yandexService = require('./services/yandex.service')
 const unpackerService = require('./services/unpacker.service')
 const transcoderService = require('./services/transcoder.service')
 const telegramService = require('./services/telegram.service')
+const databaseService = require('./services/database.service')
 
 let broker = new ServiceBroker({
   logger: console,
@@ -23,5 +24,6 @@ broker.createService(yandexService)
 broker.createService(unpackerService)
 broker.createService(transcoderService)
 broker.createService(telegramService)
+broker.createService(databaseService)
 
 broker.start()

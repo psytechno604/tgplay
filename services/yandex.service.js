@@ -16,6 +16,16 @@ module.exports = {
       async process(job) {
         const fullUrl = process.env.YANDEX_PUBLIC_DL_URL + encodeURIComponent(job.data.releaseUrl)
         const res = await axios.get(fullUrl)
+        const check = await this.broker.call('database.dlIdExists', { dlId: res.data.name })
+        if (check) {
+          this.logger.debug(`already processed: ${res.data.name}`)
+          return 'already processed'
+        }
+        await this.broker.call('database.insertDlId', {
+          dlId: res.data.name,
+          releaseUrl: job.data.releaseUrl,
+          serviceName: 'yandex'
+        })
         if (res && res.data && res.data._embedded && res.data._embedded.items
           && !this.metadata.yandexUrls.has(res.data.name)) {
           this.metadata.yandexUrls.set(res.data.name, {

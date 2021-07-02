@@ -17,6 +17,8 @@
     "moleculer": "^0.14.13",
     "moleculer-bull": "^0.2.8",
     "moleculer-web": "^0.10.0-beta2",
+    "sqlite": "^4.0.23",
+    "sqlite3": "^5.0.2",
     "tdl": "^7.0.0",
     "tdl-tdlib-addon": "^1.0.1",
     "uuid": "^8.3.2"
