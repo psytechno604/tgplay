@@ -221,7 +221,7 @@ module.exports = {
     })
 
     const watcher = chokidar.watch(process.env.TELEGRAM_DAEMON_DEST, { ignored: /^\./, persistent: true })
-    watcher.on('add', path => {
+    watcher.on('add', async path => {
       const dlId = path.replace(/^.*[\\\/]/, '')
       const check = await this.broker.call('database.dlIdExists', { dlId })
       if (check) {
