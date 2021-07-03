@@ -18,6 +18,7 @@ services:
   redis:
     image: redis
     container_name: cache
+#    command: [sh, -c, "rm -f /data/dump.rdb && redis-server"]
     expose:
       - 6379
     restart: unless-stopped
@@ -35,14 +36,14 @@ services:
       DEBUG: "${DEBUG}"
       TELEGRAM_DOWNLOAD_TIMEOUT: "${TELEGRAM_DOWNLOAD_TIMEOUT}"
       LOG_LEVEL: "${LOG_LEVEL}"
+      DB_PATH: "/app/db"
     volumes:
       - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
       - ${HOST_TGPLAY_TEMP}:/app/tmp
       - ${HOST_TD_FILES}:/app/_td_files
       - ${HOST_TD_DATABASE}:/app/_td_database
-    expose:
-      - 4200
+      - ${HOST_DB_PATH}:/app/db
     ports:
       - "4200:4200"
     restart: unless-stopped

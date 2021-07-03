@@ -1,3 +1,4 @@
+const path = require('path')
 const sqlite3 = require('sqlite3')
 const { open } = require('sqlite')
 
@@ -21,7 +22,7 @@ module.exports = {
   },
   async started() {
     this.metadata.db = await open({
-      filename: process.env.DB_FILE,
+      filename: path.join(process.env.DB_PATH, 'db.sqlite'),
       driver: sqlite3.Database
     })
     await this.metadata.db.exec('CREATE TABLE IF NOT EXISTS T_DOWNLOADS (dlId TEXT PRIMARY KEY, createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP, serviceName TEXT, releaseUrl TEXT)')
