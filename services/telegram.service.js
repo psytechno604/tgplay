@@ -82,10 +82,10 @@ module.exports = {
           if (!hasPhoto) {
             const pictureFiles = files.filter(file => pictureFormats.indexOf(file.split('.').pop()) >= 0)
             if (pictureFiles.length > 1) {
-              const params = ['--to', process.env.TRACKS_CHANNEL_URL, '--album']
+              const params = ['-u', 'whatever', '--', process.env.TELEGRAM_UPLOAD, '--to', process.env.TRACKS_CHANNEL_URL, '--album']
               pictureFiles.forEach(f => params.push(f))
               try {
-                const bashRes = await bash.call(this, { program: process.env.TELEGRAM_UPLOAD, params })
+                const bashRes = await bash.call(this, { program: 'runuser', params })
                 this.logger.debug(bashRes)
               } catch (ex) {
                 this.logger.error('photos were not uploaded', ex)
@@ -94,7 +94,7 @@ module.exports = {
 
             if (pictureFiles.length === 1) {
               try {
-                const bashRes = await bash.call(this, { program: process.env.TELEGRAM_UPLOAD, params: ['--to', process.env.TRACKS_CHANNEL_URL, pictureFiles[0], '--caption', job.data.dlId] })
+                const bashRes = await bash.call(this, { program: 'runuser', params: ['-u', 'whatever', '--', process.env.TELEGRAM_UPLOAD, '--to', process.env.TRACKS_CHANNEL_URL, pictureFiles[0], '--caption', job.data.dlId] })
                 this.logger.debug(bashRes)
               } catch (ex) {
                 this.logger.error('photo was not uploaded', ex)
@@ -104,10 +104,10 @@ module.exports = {
 
           const mp3Files = ThroughDirectoryWrapper(path.join(process.env.TMP_DIR, 'mp3', job.data.dlId))
           if (mp3Files.length) {
-            const params = ['--to', process.env.TRACKS_CHANNEL_URL, '--album']
+            const params = ['-u', 'whatever', '--', process.env.TELEGRAM_UPLOAD, '--to', process.env.TRACKS_CHANNEL_URL, '--album']
             mp3Files.forEach(f => params.push(f))
             this.logger.debug('running TELEGRAM_UPLOAD', { params })
-            await bash.call(this, { program: process.env.TELEGRAM_UPLOAD, params })
+            await bash.call(this, { program: 'runuser', params })
           }
 
           try {

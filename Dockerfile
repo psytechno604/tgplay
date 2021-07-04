@@ -51,7 +51,4 @@ COPY services/ /app/services/
 COPY lib/ /app/lib/
 RUN chmod +x start.sh
 
-# entrypoint:
-COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
 CMD ["/app/start.sh"]
