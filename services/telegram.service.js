@@ -233,7 +233,7 @@ module.exports = {
         serviceName: 'telegram'
       })
       this.logger.debug(`will create job for unpacker-queue, dlId=${dlId}, path=${path}`)
-      this.createJob('unpacker-queue', { path, dlId },  { ...jobOpts(dlId), delay: process.env.UNPACKER_DELAY })
+      this.createJob('unpacker-queue', { path, dlId },  { ...jobOpts(dlId), delay: 1 * process.env.UNPACKER_DELAY })
     })
 
     setTimeout(() => {
