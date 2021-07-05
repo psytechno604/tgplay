@@ -164,6 +164,21 @@ module.exports = {
           return
         }
         // download attachment from telegram cloud:
+        if (payload._ === 'updateMessageContent' && payload.new_content && payload.new_content.text && payload.new_content.text.text && payload.new_content.text.text.endsWith(' ready')) {
+          const archiveFile = path.join(process.env.TELEGRAM_DAEMON_DEST, payload.new_content.text.text.substr(0, payload.new_content.text.text.length - 6))
+          const dlId = archiveFile.replace(/^.*[\\\/]/, '')
+          const check = await this.broker.call('database.dlIdExists', { dlId })
+          if (check) {
+            this.logger.debug(`already processed: ${dlId}`)
+            return 'already processed'
+          }
+          await this.broker.call('database.insertDlId', {
+            dlId,
+            serviceName: 'telegram'
+          })
+          this.logger.debug(`will create job for unpacker-queue, dlId=${dlId}, archiveFile=${archiveFile}`)
+          this.createJob('unpacker-queue', { archiveFile, dlId }, { ...jobOpts(dlId), delay: 1 * process.env.UNPACKER_DELAY })
+        }
         if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.document) {
           if (!this.metadata.msgIdCache[payload.chat_id].has(payload.last_message.id)) {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
@@ -218,22 +233,6 @@ module.exports = {
           }
         }
       }
-    })
-
-    const watcher = chokidar.watch(process.env.TELEGRAM_DAEMON_DEST, { ignored: /^\./, persistent: true })
-    watcher.on('add', async path => {
-      const dlId = path.replace(/^.*[\\\/]/, '')
-      const check = await this.broker.call('database.dlIdExists', { dlId })
-      if (check) {
-        this.logger.debug(`already processed: ${dlId}`)
-        return 'already processed'
-      }
-      await this.broker.call('database.insertDlId', {
-        dlId,
-        serviceName: 'telegram'
-      })
-      this.logger.debug(`will create job for unpacker-queue, dlId=${dlId}, path=${path}`)
-      this.createJob('unpacker-queue', { path, dlId },  { ...jobOpts(dlId), delay: 1 * process.env.UNPACKER_DELAY })
     })
 
     setTimeout(() => {
