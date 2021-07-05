@@ -23,7 +23,7 @@ module.exports = {
           if (losslessAudioFormats.indexOf(file.split('.').pop()) >= 0) {
             const filePath = path.join(process.env.TMP_DIR, 'mp3', job.data.dlId, file.replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '.mp3'))
             await bash.call(this, {
-              program: process.env.FFMPEG, params: ['-y', '-i', file, '-vn', '-ar', '44100', '-ac', '2', '-b:a', '320k', filePath]
+              program: process.env.FFMPEG, params: ['-y', '-i', file, '-vn', '-ar', '44100', '-ac', '2', '-b:a', process.env.MP3_BITRATE || '320k', filePath]
             })
             outfiles.push(filePath)
           }
