@@ -26,25 +26,29 @@ module.exports = {
           const msg = `already processing: ${job.data.dlId}`
           this.logger.debug(msg)
           return msg
+        }        
+        await bash.call(this, { program: 'mkdir', params: ['-p', path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)] })
+        const ext = job.data.archiveFile.split('.').pop()
+        const index = ['zip', 'rar'].indexOf(ext)
+        if (index < 0) {
+          return `extension ${ext} not supported, dlId ${job.data.dlId}, job.id ${job.id}`
         }
         this.metadata.dlCache.set(job.data.dlId, 1)
-        await bash.call(this, { program: 'mkdir', params: ['-p', path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)] })
-        const ext = job.data.path.split('.').pop()
-        const index = ['zip', 'rar'].indexOf(ext)
-        
-        if (index === 0) {
-          await bash.call(this, {
-            program: 'unzip', params: ['-o', job.data.path, '-d', path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)]
-          })
-        }
-        if (index === 1) {
-          await bash.call(this, {
-            program: 'unrar', params: ['e', job.data.path, path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)]
-          })
-        }
-        await bash.call(this, { program: 'rm', params: [job.data.path] })
-        if (index < 0) {
-          throw new Error(`extension ${ext} not supported, dlId ${job.data.dlId}, job.id ${job.id}`)
+        try {
+          if (index === 0) {
+            await bash.call(this, {
+              program: 'unzip', params: ['-o', job.data.archiveFile, '-d', path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)]
+            })
+          }
+          if (index === 1) {
+            await bash.call(this, {
+              program: 'unrar', params: ['e', job.data.archiveFile, path.join(process.env.TMP_DIR, 'unpack', job.data.dlId)]
+            })
+          }
+          await bash.call(this, { program: 'rm', params: [job.data.archiveFile] })
+        } catch (ex) {
+          this.metadata.dlCache.delete(job.data.dlId)
+          throw ex
         }
         this.createJob('transcoder-queue', { dlId: job.data.dlId }, jobOpts(job.data.dlId))
       }
