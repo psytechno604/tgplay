@@ -19,6 +19,7 @@ module.exports = {
         await bash.call(this, { program: 'mkdir', params: ['-p', mp3Dir] })
         const files = job.data.filePath ? [job.data.filePath] : ThroughDirectoryWrapper(path.join(process.env.TMP_DIR, 'unpack', job.data.dlId))
         const outfiles = []
+        let progress = 0
         for (const file of files) {
           if (losslessAudioFormats.indexOf(file.split('.').pop()) >= 0) {
             const filePath = path.join(process.env.TMP_DIR, 'mp3', job.data.dlId, file.replace(/^.*[\\\/]/, '').replace(/\.[^.]+$/, '.mp3'))
@@ -27,6 +28,8 @@ module.exports = {
             })
             outfiles.push(filePath)
           }
+          progress++          
+          job.progress(100 * progress / files.length)
         }
         this.broker.broadcast('file-complete', { dlId: job.data.dlId, files })
         return outfiles
