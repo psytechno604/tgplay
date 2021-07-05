@@ -29,14 +29,6 @@ RUN sha1sum -c check.txt
 RUN tar xf ffmpeg-release-amd64-static.tar.xz
 RUN rm ffmpeg-release-amd64-static.tar.xz
 
-# env vars:
-ENV TMP_DIR "/app/tmp"
-ENV TELEGRAM_UPLOAD "telegram-upload"
-ENV FFMPEG "/app/ffmpeg-4.4-amd64-static/ffmpeg"
-ENV TELEGRAM_DAEMON_DEST "/downloads"
-ENV TELEGRAM_DAEMON_TEMP "/tmp"
-ENV LIBTDJSON_SO "/td/build/libtdjson.so"
-
 # directories:
 RUN mkdir /downloads
 RUN mkdir /home/whatever/.config
@@ -51,5 +43,13 @@ COPY .env.defaults /app/
 COPY services/ /app/services/
 COPY lib/ /app/lib/
 RUN chmod +x start.sh
+
+# env vars:
+ENV TMP_DIR "/app/tmp"
+ENV TELEGRAM_UPLOAD "telegram-upload"
+ENV FFMPEG "/app/ffmpeg-4.4-amd64-static/ffmpeg"
+ENV TELEGRAM_DAEMON_DEST "/downloads"
+ENV TELEGRAM_DAEMON_TEMP "/tmp"
+ENV LIBTDJSON_SO "/td/build/libtdjson.so"
 
 CMD ["/app/start.sh"]
