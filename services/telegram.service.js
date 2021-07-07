@@ -72,13 +72,6 @@ module.exports = {
             message_ids: [messageId]
           })
 
-          messageId && await client.invoke({ // TODO: !!! wtf !!!
-            _: 'forwardMessages',
-            chat_id: process.env.TRACKS_CHANNEL,
-            from_chat_id: process.env.SOURCE_CHANNEL,
-            message_ids: [messageId]
-          })
-
           if (!hasPhoto) {
             const pictureFiles = files.filter(file => pictureFormats.indexOf(file.split('.').pop()) >= 0)
             if (pictureFiles.length > 1) {
@@ -141,23 +134,28 @@ module.exports = {
           dlCount[payload.chat_id].push(payload)
           return
         }
-        if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && payload.last_message.content.document) {
+        // forward all messages with text & document:
+        if (payload._ === 'updateChatLastMessage' && payload.last_message && payload.last_message.content && (payload.last_message.content.document || payload.last_message.content.text && payload.last_message.content.text.text)) {
           if (!this.metadata.msgIdCache[payload.chat_id].has(payload.last_message.id)) {
             this.metadata.msgIdCache[payload.chat_id].set(payload.last_message.id, {
               messageId: payload.last_message.id,
               text: payload.last_message.content.text,
               hasPhoto
             })
+          }
+          const check = await this.broker.call('database.messageIdExists', { messageId: payload.last_message.id })
+          if (!check) {
             await client.invoke({
               _: 'forwardMessages',
               chat_id: process.env.TELEGRAM_DAEMON_CHANNEL,
               from_chat_id: process.env.SOURCE_CHANNEL,
               message_ids: [payload.last_message.id]
             })
+            await this.broker.call('database.insertMessageId', { messageId: payload.last_message.id })
           }
         }
       }
-      if (payload.chat_id === +process.env.TELEGRAM_DAEMON_CHANNEL || payload.chat_id === +process.env.SOURCE_CHANNEL) {
+      if (payload.chat_id === +process.env.TELEGRAM_DAEMON_CHANNEL) {
         // patch to skip first 3 messages on start (in each chat)
         if (dlCount[payload.chat_id].length < dlLimit) {
           dlCount[payload.chat_id].push(payload)
