@@ -56,7 +56,7 @@ module.exports = {
           if (typeof hasPhoto === 'undefined') {
             const cacheEntry = this.metadata.dlCache.get(job.data.dlId)
             if (!cacheEntry) {
-              this.logger.error('No cache entry fol dlId', job.data.dlId)
+              this.logger.error('No cache entry for dlId', job.data.dlId)
             }
             cacheEntry && (hasPhoto = this.metadata.dlCache.get(job.data.dlId).hasPhoto)
           }
@@ -152,6 +152,24 @@ module.exports = {
               message_ids: [payload.last_message.id]
             })
             await this.broker.call('database.insertMessageId', { messageId: payload.last_message.id })
+          } else {
+            await client.invoke({
+              _: 'sendMessage',
+              chat_id: process.env.LOG_CHANNEL,
+              input_message_content: {
+                _: 'inputMessageText',
+                text: {
+                  _: 'formattedText',
+                  text: `already forwarded: messageId=${payload.last_message.id}`
+                }
+              }
+            })
+            await client.invoke({
+              _: 'forwardMessages',
+              chat_id: process.env.LOG_CHANNEL,
+              from_chat_id: process.env.SOURCE_CHANNEL,
+              message_ids: [payload.last_message.id]
+            })
           }
         }
       }
