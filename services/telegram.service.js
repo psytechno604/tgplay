@@ -118,6 +118,21 @@ module.exports = {
       }
     }
   },
+  methods: {
+    sendMessage(chat_id, text) {
+      return client.invoke({
+        _: 'sendMessage',
+        chat_id,
+        input_message_content: {
+          _: 'inputMessageText',
+          text: {
+            _: 'formattedText',
+            text
+          }
+        }
+      })
+    }
+  },
   async started() {
     this.logger.debug('LIBTDJSON_SO', process.env.LIBTDJSON_SO)
     client = new Client(new TDLib(process.env.LIBTDJSON_SO), {
@@ -153,17 +168,7 @@ module.exports = {
             })
             await this.broker.call('database.insertMessageId', { messageId: payload.last_message.id })
           } else {
-            await client.invoke({
-              _: 'sendMessage',
-              chat_id: process.env.LOG_CHANNEL,
-              input_message_content: {
-                _: 'inputMessageText',
-                text: {
-                  _: 'formattedText',
-                  text: `already forwarded: messageId=${payload.last_message.id}`
-                }
-              }
-            })
+            await this.sendMessage(process.env.LOG_CHANNEL, `already forwarded. messageId=${payload.last_message.id}:`)
             await client.invoke({
               _: 'forwardMessages',
               chat_id: process.env.LOG_CHANNEL,
