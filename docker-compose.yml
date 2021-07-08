@@ -37,7 +37,8 @@ services:
       TELEGRAM_DOWNLOAD_TIMEOUT: "${TELEGRAM_DOWNLOAD_TIMEOUT}"
       LOG_LEVEL: "${LOG_LEVEL}"
       DB_PATH: "/app/db"
-      MP3_BITRATE: "320k"
+      MP3_BITRATE: "${MP3_BITRATE}"
+      LOG_CHANNEL: "${LOG_CHANNEL}"
     volumes:
       - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
