@@ -118,6 +118,11 @@ module.exports = {
       }
     }
   },
+  actions: {
+    sendMessage(ctx) {
+      return this.sendMessage(ctx.params.chat_id, ctx.params.text)
+    }
+  },
   methods: {
     sendMessage(chat_id, text) {
       return client.invoke({
