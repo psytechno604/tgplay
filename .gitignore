@@ -17,6 +17,5 @@ ffmpeg-release-amd64-static.tar.xz
 *.zip
 tgplay.tar
 tdd.tar
-telegram-upload.json
-telegram-upload.session
-db.sqlite
+telegram-upload/
+*db.sqlite
