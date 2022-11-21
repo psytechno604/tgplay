@@ -1,0 +1,51 @@
+version: '3.5'
+
+services:
+  tdd:
+    image: ${DOCKERHUB_USER}/tdd:${TDD_TAG}
+    environment:
+      TELEGRAM_DAEMON_API_ID: "${API_ID}"
+      TELEGRAM_DAEMON_API_HASH: "${API_HASH}"
+      TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"
+      TELEGRAM_DAEMON_DEST: "/downloads"
+      TELEGRAM_DAEMON_TEMP: "/tmp"
+      TELEGRAM_DAEMON_SESSION_PATH: "/session"
+    volumes:
+       - ${HOST_TELEGRAM_DAEMON_SESSION_PATH}:/session
+       - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
+       - ${HOST_TELEGRAM_DAEMON_TEMP}:/tmp
+    restart: unless-stopped
+  redis:
+    image: redis
+    container_name: cache
+#    command: [sh, -c, "rm -f /data/dump.rdb && redis-server"]
+    expose:
+      - 6379
+    restart: unless-stopped
+  tgplay:
+    image: ${DOCKERHUB_USER}/tgplay:${TGPLAY_TAG}
+#    image: tgplay:latest
+    environment:
+      API_ID: "${API_ID}"
+      API_HASH: "${API_HASH}"
+      SOURCE_CHANNEL: "${SOURCE_CHANNEL}"
+      TRACKS_CHANNEL: "${TRACKS_CHANNEL}"
+      TRACKS_CHANNEL_URL: "${TRACKS_CHANNEL_URL}"
+      TELEGRAM_DAEMON_CHANNEL: "${TELEGRAM_DAEMON_CHANNEL}"  
+      TRANSPORTER: "redis://redis:6379"
+      DEBUG: "${DEBUG}"
+      TELEGRAM_DOWNLOAD_TIMEOUT: "${TELEGRAM_DOWNLOAD_TIMEOUT}"
+      LOG_LEVEL: "${LOG_LEVEL}"
+      DB_PATH: "/app/db"
+      MP3_BITRATE: "${MP3_BITRATE}"
+      LOG_CHANNEL: "${LOG_CHANNEL}"
+    volumes:
+      - ${HOST_TELEGRAM_UPLOAD_SESSION_PATH}:/home/whatever/.config
+      - ${HOST_TELEGRAM_DAEMON_DEST}:/downloads
+      - ${HOST_TGPLAY_TEMP}:/app/tmp
+      - ${HOST_TD_FILES}:/app/_td_files
+      - ${HOST_TD_DATABASE}:/app/_td_database
+      - ${HOST_DB_PATH}:/app/db
+    ports:
+      - "4200:4200"
+    restart: unless-stopped
