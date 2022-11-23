@@ -22,15 +22,6 @@
         "<node_internals>/**"
       ],
       "program": "${workspaceFolder}/api.js"
-    },
-    {
-      "type": "pwa-node",
-      "request": "launch",
-      "name": "tg",
-      "skipFiles": [
-        "<node_internals>/**"
-      ],
-      "program": "${workspaceFolder}/tg.service.js"
     }
   ]
 }

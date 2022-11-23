@@ -9,10 +9,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@bull-board/api": "^4.6.4",
+    "@bull-board/express": "^4.6.4",
     "axios": "^0.21.1",
     "bull": "^3.22.4",
-    "bull-board": "^2.0.2",
-    "chokidar": "^3.5.1",
+    "bullmq": "^3.2.2",
     "dotenv-defaults": "^2.0.1",
     "moleculer": "^0.14.13",
     "moleculer-bull": "^0.2.8",
@@ -20,7 +21,6 @@
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "tdl": "^7.0.0",
-    "tdl-tdlib-addon": "^1.0.1",
-    "uuid": "^8.3.2"
+    "tdl-tdlib-addon": "^1.2.1"
   }
 }

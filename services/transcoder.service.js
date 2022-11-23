@@ -1,5 +1,4 @@
 const path = require('path')
-const fs = require('fs')
 const QueueService = require('moleculer-bull')
 const bash = require('../lib/bash')
 const { ThroughDirectoryWrapper } = require('../lib/utils')

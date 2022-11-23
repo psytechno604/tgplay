@@ -1,8 +1,6 @@
 
 const fs = require('fs')
 const path = require('path')
-const uuid = require('uuid')
-const chokidar = require('chokidar')
 const { Client } = require('tdl')
 const { TDLib } = require('tdl-tdlib-addon')
 const bash = require('../lib/bash')
@@ -144,7 +142,7 @@ module.exports = {
       apiId: process.env.API_ID, // Your api_id, get it at http://my.telegram.org/
       apiHash: process.env.API_HASH // Your api_hash
     })
-    await client.connectAndLogin()
+    await client.login()
     client.on('error', this.logger.error)
     client.on('update', async payload => {
       const hasPhoto = payload && payload.last_message && payload.last_message.content && payload.last_message.content.web_page && !!payload.last_message.content.web_page.photo

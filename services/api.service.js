@@ -1,19 +1,49 @@
 const ApiGateway = require('moleculer-web')
-const Queue = require('bull')
-const { createBullBoard } = require('bull-board')
-const { BullAdapter } = require('bull-board/bullAdapter')
+
+const { createBullBoard } = require('@bull-board/api')
+const { BullMQAdapter } = require('@bull-board/api/bullMQAdapter')
+const { ExpressAdapter } = require('@bull-board/express')
+const { Queue: QueueMQ } = require('bullmq')
+
+let redisOptions = {
+  port: 6379,
+  host: '',
+  password: '',
+  tls: false
+}
+if (process.env.TRANSPORTER) {
+  redisOptions = /^redis:\/\/((.*?)\:(.*?)@)?(.*?)\:([0-9]*)$/g
+    .exec(process.env.TRANSPORTER)
+    .reduce((result, value, index) => {
+      switch (index) {
+        case 2:
+          // username
+          break
+        case 3: result['password'] = value; break
+        case 4: result['host'] = value; break
+        case 5: result['port'] = parseInt(value); break
+      }
+      return result
+    }, redisOptions)
+}
 
 const queues = [
-  new Queue(`telegram-upload-queue`, process.env.TRANSPORTER),
-  new Queue(`yandex-url-queue`, process.env.TRANSPORTER),
-  new Queue(`yandex-file-queue`, process.env.TRANSPORTER),
-  new Queue(`unpacker-queue`, process.env.TRANSPORTER),
-  new Queue(`transcoder-queue`, process.env.TRANSPORTER),
+  new QueueMQ(`telegram-upload-queue`, { connection: redisOptions }),
+  new QueueMQ(`yandex-url-queue`, { connection: redisOptions }),
+  new QueueMQ(`yandex-file-queue`, { connection: redisOptions }),
+  new QueueMQ(`unpacker-queue`, { connection: redisOptions }),
+  new QueueMQ(`transcoder-queue`, { connection: redisOptions }),
 ]
 
-const bullAdapters = queues.map(queue => new BullAdapter(queue))
+const bullAdapters = queues.map(queue => new BullMQAdapter(queue))
 
-const { router } = createBullBoard(bullAdapters)
+const serverAdapter = new ExpressAdapter()
+serverAdapter.setBasePath(`/bull-board`)
+
+createBullBoard({
+  queues: bullAdapters,
+  serverAdapter
+})
 
 module.exports = {
   name: 'api',
@@ -24,7 +54,7 @@ module.exports = {
     routes: [
       {
         path: '/bull-board',
-        use: [router],
+        use: [serverAdapter.getRouter()],
       }
     ]
   }
